@@ -23,6 +23,8 @@ namespace Day15Task
             SetPlayerShip();
 
             SetComputerShip();
+
+            AttackShip();
         }
 
         void SetPlayerShip()
@@ -172,7 +174,20 @@ namespace Day15Task
 
         void AttackShip()
         {
+            int posX = 0;
+            int posY = 0;
 
+            // 플레이어가 지거나 컴퓨터가 졌을 때까지 반복
+            while(true)
+            {
+                Console.Write("공격할 X 좌표 입력해주세요(0 ~ 9 입력) : ");
+                int.TryParse(Console.ReadLine(), out posX);
+                Console.Write("공격할 Y 좌표 입력해주세요(0 ~ 9 입력) : ");
+                int.TryParse(Console.ReadLine(), out posY);
+
+                Vector2 attackPos = new Vector2(posX, posY);
+                
+            }
         }
     }
 }

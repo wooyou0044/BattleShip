@@ -45,10 +45,7 @@
   <ItemGroup>
     <Compile Include="BattleShip.cs" />
     <Compile Include="Computer.cs" />
-    <Compile Include="Game.cs" />
     <Compile Include="GameBoard.cs" />
-    <Compile Include="Hero.cs" />
-    <Compile Include="Monster.cs" />
     <Compile Include="Player.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
