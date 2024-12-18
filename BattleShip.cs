@@ -13,6 +13,7 @@ namespace Day15Task
         Player _player;
         Computer _computer;
         GameBoard _board;
+        Random rand = new Random();
 
         public void Play()
         {
@@ -23,6 +24,7 @@ namespace Day15Task
             SetPlayerShip();
 
             SetComputerShip();
+
 
             AttackShip();
         }
@@ -118,14 +120,14 @@ namespace Day15Task
             {
                 Console.WriteLine("게임을 시작합니다.");
                 _board = new GameBoard(_player);
-                _board.PrintGameBoard(true);
+                _board.PlayerAttackComInfoBoard(true);
+                _board.PrintGameBoard(false);
             }
         }
 
         void SetComputerShip()
         {
             // 컴퓨터가 랜덤으로 돌아가서 세팅하게 설정
-            Random rand = new Random();
             int setShipNum = 0;
 
             while (setShipNum < _computer.ComshipsArr.Length)
@@ -152,13 +154,12 @@ namespace Day15Task
                     }
                     else
                     {
-                        //posX = rand.Next(0, 10);
-                        //posY = rand.Next(0, 10);
+                        posX = rand.Next(0, 10);
+                        posY = rand.Next(0, 10);
 
-                        //// 랜덤 X, Y좌표로 해당 배열에 위치 대입
-                        //shipPos = new Vector2(posX, posY);
-                        //_computer.ComshipsArr[setShipNum].ShipLocation[0] = shipPos;
-                        continue;
+                        // 랜덤 X, Y좌표로 해당 배열에 위치 대입
+                        shipPos = new Vector2(posX, posY);
+                        _computer.ComshipsArr[setShipNum].ShipLocation[0] = shipPos;
                     }
 
                 }
@@ -167,26 +168,128 @@ namespace Day15Task
             }
 
             _board = new GameBoard(_computer);
-            _board.PrintComputerGameBoard();
+            _board.PrintComputerGameBoard(false);
 
             Console.WriteLine("상대방인 컴퓨터도 세팅 완료했습니다.");
+            Console.WriteLine();
         }
 
         void AttackShip()
         {
             int posX = 0;
             int posY = 0;
+            Vector2 comShipPos;
+            Vector2 playerShipPos;
+            int playerAttackNum = 0;
+            int comAttackNum = 0;
+
+            bool isComAttack = false;
+            bool isPlayerAttack = false;
+
+            string shipPlayerName = "";
+            string shipComName = "";
 
             // 플레이어가 지거나 컴퓨터가 졌을 때까지 반복
-            while(true)
+            while (comAttackNum < 17 && playerAttackNum < 17)
             {
                 Console.Write("공격할 X 좌표 입력해주세요(0 ~ 9 입력) : ");
                 int.TryParse(Console.ReadLine(), out posX);
                 Console.Write("공격할 Y 좌표 입력해주세요(0 ~ 9 입력) : ");
                 int.TryParse(Console.ReadLine(), out posY);
+                Console.WriteLine();
+                for (int i = 0; i < _computer.ComshipsArr.Length; i++)
+                {
+                    for (int j = 0; j < _computer.ComshipsArr[i].ShipSize; j++)
+                    {
+                        comShipPos = _computer.ComshipsArr[i].ShipLocation[j];
+                        // 입력한 X,Y 좌표와 컴퓨터 배들 중 하나의 위치와 같다면
+                        if (comShipPos.posX == posX && comShipPos.posY == posY)
+                        {
+                            // GameBoard로 좌표를 보내서 그 좌표에 있는 배를 □로 만들고 배열에서는 0으로 바꿈
+                            // 내 쪽 위에 있는 보드판에 맞췄다는 표시로 빨간색 핀 ●을 꽂아 표시
+                            _board.ComputerBoard[posY, posX] = 0;
+                            _computer.ComshipsArr[j].IsDamaged = true;
+                            shipComName = _computer.ComshipsArr[i].ShipName;
+                            isPlayerAttack = true;
+                            playerAttackNum++;
+                            break;
+                        }
+                        // 컴퓨터 배들 중 하나의 위치를 맞추지 못했다면 내 쪽에 있는 보드판에 못 맞췄다는 표시로 하얀색 핀을 꽂아 표시
+                        else
+                        {
+                            _board.BoardAttackInfo[posY, posX] = 1;
+                        }
+                    }
+                    if (isPlayerAttack)
+                    {
+                        break;
+                    }
+                }
 
-                Vector2 attackPos = new Vector2(posX, posY);
-                
+                // 컴퓨터가 플레이어 배를 랜덤으로 돌린 x,y 좌표로 공격
+                posX = rand.Next(0, 10);
+                posY = rand.Next(0, 10);
+
+                // 랜덤으로 돌린 숫자가 전에 공격한 숫자라면 다시 랜덤 돌리기
+
+                for(int i=0; i<_player.ShipsArr.Length;i++)
+                {
+                    for(int j=0; j < _player.ShipsArr[i].ShipSize; j++)
+                    {
+                        playerShipPos = _player.ShipsArr[i].ShipLocation[j];
+                        if(playerShipPos.posX == posX && playerShipPos.posY == posY)
+                        {
+                            _board.BoardArr[posY, posX] = 0;
+                            _player.ShipsArr[j].IsDamaged = true;
+                            shipPlayerName = _player.ShipsArr[i].ShipName;
+                            isComAttack = true;
+                            comAttackNum++;
+                            break;
+                        }
+                    }
+                    if(isPlayerAttack)
+                    {
+                        break;
+                    }
+                }
+
+                _board.PlayerAttackComInfoBoard(true);
+                _board.PrintGameBoard(true);
+                Console.WriteLine();
+                Console.WriteLine();
+                _board.PrintComputerGameBoard(true);
+                if (isComAttack)
+                {
+                    Console.WriteLine($"상대방에게 내 배의 한 쪽이 공격받았습니다. 종류 : {shipPlayerName}");
+                    Console.WriteLine($"X 좌표 : {posX}\tY 좌표 : {posY}");
+                    isComAttack = false;
+                }
+                if (isPlayerAttack)
+                {
+                    Console.WriteLine($"상대방 배의 한 쪽을 맞췄습니다. 종류 : {shipComName}");
+                    isPlayerAttack = false;
+                }
+            }
+
+            if(comAttackNum == 17)
+            {
+                comAttackNum = 0;
+                Console.Clear();
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("컴퓨터가 승리했습니다.");
+                Console.ResetColor();
+            }
+
+            if(playerAttackNum == 17)
+            {
+                playerAttackNum = 0;
+                Console.Clear();
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine("♥♥♥♥♥♥♥♥♥♥♥♥♥");
+                Console.WriteLine("플레이어가 승리했습니다.");
+                Console.WriteLine("♥♥♥♥♥♥♥♥♥♥♥♥♥");
+                Console.ResetColor();
+                Console.WriteLine();
             }
         }
     }
